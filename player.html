@@ -25,13 +25,13 @@ html, body {
 /* NOVA COR */
 :root {
   --plyr-color-main: rgba(19, 40, 253, 1);
-  --plyr-control-icon-size: 16px;
-  --plyr-control-spacing: 10px;
+  --plyr-control-icon-size: 24px; /* aumentei o tamanho dos ícones */
+  --plyr-control-spacing: 12px;
 }
 
 .plyr__controls {
   background: linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,0));
-  padding: 16px;
+  padding: 20px 16px; /* HUD maior */
 }
 
 .plyr--hide-controls .plyr__controls {
@@ -41,23 +41,34 @@ html, body {
 .plyr__control {
   background: transparent;
   opacity: .9;
+  min-width: 48px; /* botões maiores */
+  min-height: 48px;
+  transition: opacity 0.2s ease; /* removida escala */
 }
 
 .plyr__control:hover {
   opacity: 1;
-  transform: scale(1.15);
 }
 
 .plyr__control--overlaid {
-  background: rgba(0,0,0,.6);
+  background: rgba(0,0,0,.8);
   border: 2px solid rgba(255,255,255,.4);
-  width: 84px;
-  height: 84px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.plyr__control--overlaid svg {
+  width: 36px;
+  height: 36px;
 }
 
 .plyr__progress input[type=range],
 .plyr__progress__buffer {
-  height: 3px;
+  height: 4px; /* barra maior */
 }
 
 .plyr__progress__buffer {
@@ -65,8 +76,8 @@ html, body {
 }
 
 .plyr__time {
-  font-size: 12px;
-  opacity: .75;
+  font-size: 14px;
+  opacity: .85;
 }
 
 .plyr__menu__container {
@@ -103,7 +114,7 @@ if (videoUrl) {
     clickToPlay: true,
     resetOnEnd: true,
     controls: [
-      'play-large',
+      'play-large',  // customizado via CSS estilo Netflix
       'play',
       'rewind',
       'fast-forward',
@@ -125,5 +136,3 @@ if (videoUrl) {
 
 </body>
 </html>
-
-
