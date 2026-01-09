@@ -8,12 +8,10 @@
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
 
 <style>
-/* COR PRINCIPAL */
 :root {
-  --plyr-color-main: red;
+  --plyr-color-main: rgba(19, 40, 253, 1);
 }
 
-/* FONTE ESTILO NETFLIX */
 html, body {
   margin: 0;
   width: 100%;
@@ -29,12 +27,12 @@ html, body {
     sans-serif;
 }
 
-/* ANIMAÇÃO SUAVE DOS CONTROLES */
+/* CONTROLES – ANIMAÇÃO SUAVE */
 .plyr__controls {
   animation: fadeUp .25s ease;
 }
 
-/* BOTÕES – ANIMAÇÃO LEVE (SEM ALTERAR TAMANHO PADRÃO) */
+/* BOTÕES – ANIMAÇÃO LEVE */
 .plyr__control {
   transition:
     transform .15s ease,
@@ -45,9 +43,10 @@ html, body {
   transform: scale(1.08);
 }
 
-/* PLAY LARGE – APENAS FADE (PADRÃO VISUAL) */
+/* ❌ SEM QUALQUER ANIMAÇÃO NO PLAY LARGE */
 .plyr__control--overlaid {
-  animation: fadeIn .2s ease;
+  animation: none !important;
+  transition: none !important;
 }
 
 /* KEYFRAMES */
@@ -60,11 +59,6 @@ html, body {
     opacity: 1;
     transform: translateY(0);
   }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }
 </style>
 </head>
