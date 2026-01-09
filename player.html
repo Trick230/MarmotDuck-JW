@@ -8,14 +8,63 @@
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
 
 <style>
+/* COR PRINCIPAL */
 :root {
-  --plyr-color-main: rgba(19, 40, 253, 1);
+  --plyr-color-main: red;
 }
+
+/* FONTE ESTILO NETFLIX */
 html, body {
   margin: 0;
   width: 100%;
   height: 100%;
   background: #000;
+  font-family:
+    "Netflix Sans",
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    Inter,
+    system-ui,
+    sans-serif;
+}
+
+/* ANIMAÇÃO SUAVE DOS CONTROLES */
+.plyr__controls {
+  animation: fadeUp .25s ease;
+}
+
+/* BOTÕES – ANIMAÇÃO LEVE (SEM ALTERAR TAMANHO PADRÃO) */
+.plyr__control {
+  transition:
+    transform .15s ease,
+    opacity .15s ease;
+}
+
+.plyr__control:hover {
+  transform: scale(1.08);
+}
+
+/* PLAY LARGE – APENAS FADE (PADRÃO VISUAL) */
+.plyr__control--overlaid {
+  animation: fadeIn .2s ease;
+}
+
+/* KEYFRAMES */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 </style>
 </head>
