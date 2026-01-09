@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <title></title>
+  <title>Player Netflix Style</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS Netflix -->
+  <!-- Skin Netflix -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wilson959/player@master/Netflix_3.css">
 
+  <!-- Estilo custom azul -->
   <style>
     html, body {
       margin: 0;
@@ -21,9 +23,22 @@
       width: 100% !important;
       height: 100% !important;
     }
+
+    /* Barra progresso, botões e spinner azul */
+    .jw-progress, .jw-progress-filled,
+    .jw-icon-playback, .jw-icon-volume, .jw-icon-settings,
+    .jw-icon-fullscreen, .jw-icon-rewind,
+    .jw-slider-volume .jw-progress {
+      color: #2196f3 !important;
+      background-color: #2196f3 !important;
+    }
+
+    /* Spinner */
+    .jw-icon-buffer { color: #2196f3 !important; }
+    .jw-spinner { border-color: rgba(33,150,243,0.3) !important; }
+    .jw-spinner .jw-spinner-dot { background-color: #2196f3 !important; }
   </style>
 </head>
-
 <body>
 
 <div id="player"></div>
@@ -32,20 +47,17 @@
 <script src="https://cdn.jwplayer.com/libraries/DV3FtaT5.js"></script>
 
 <script>
-  // 🔹 LÊ O LINK DO VÍDEO PELO IFRAME
+  // Lê query do iframe
   const params = new URLSearchParams(window.location.search);
   const videoSrc = params.get("src");
+  const serieName = params.get("name") || "Sem título";
 
-  if (!videoSrc) {
-    document.body.innerHTML =
-      "<p style='color:white;text-align:center;margin-top:20px'>Nenhum vídeo fornecido</p>";
+  if(!videoSrc){
+    document.body.innerHTML = "<p style='color:white;text-align:center;margin-top:20px'>Nenhum vídeo fornecido</p>";
     throw new Error("SRC não informado");
   }
 
-  // Detecta tipo automaticamente
-  const videoType = videoSrc.includes(".m3u8") || videoSrc.includes(".txt")
-    ? "hls"
-    : "mp4";
+  const videoType = videoSrc.includes(".m3u8") || videoSrc.includes(".txt") ? "hls" : "mp4";
 
   const playerInstance = jwplayer("player").setup({
     controls: true,
@@ -56,19 +68,14 @@
     displaydescription: true,
     abouttext: "",
     aboutlink: "",
-    skin: {
-      name: "netflix"
-    },
+    skin: { name: "netflix" },
     playlist: [
       {
-        title: "",
-        description: "Estás a assistir",
+        title: "ESTÁS A ASSISTIR",
+        description: decodeURIComponent(serieName),
         image: "https://modocineplus.com/embed/image.php?id=439079&raw=1",
         sources: [
-          {
-            file: decodeURIComponent(videoSrc),
-            type: videoType
-          }
+          { file: decodeURIComponent(videoSrc), type: videoType }
         ],
         captions: [],
         tracks: []
@@ -76,7 +83,7 @@
     ]
   });
 
-  // 🔹 BOTÃO DOWNLOAD + FORWARD 10s (mantido igual)
+  // Botão download + Forward 10s
   playerInstance.on("ready", function () {
     const buttonId = "download-video-button";
     const iconPath = "";
@@ -102,7 +109,7 @@
     const forwardContainer = rewindContainer.cloneNode(true);
     const forwardDisplayButton = forwardContainer.querySelector(".jw-icon-rewind");
     forwardDisplayButton.style.transform = "scaleX(-1)";
-    forwardDisplayButton.ariaLabel = "";
+    forwardDisplayButton.ariaLabel = "Forward 10 Seconds";
 
     const nextContainer = playerContainer.querySelector(".jw-display-icon-next");
     nextContainer.parentNode.insertBefore(forwardContainer, nextContainer);
@@ -112,7 +119,7 @@
     const rewindControlBarButton = buttonContainer.querySelector(".jw-icon-rewind");
     const forwardControlBarButton = rewindControlBarButton.cloneNode(true);
     forwardControlBarButton.style.transform = "scaleX(-1)";
-    forwardControlBarButton.ariaLabel = "";
+    forwardControlBarButton.ariaLabel = "Forward 10 Seconds";
 
     rewindControlBarButton.parentNode.insertBefore(
       forwardControlBarButton,
@@ -129,6 +136,3 @@
 
 </body>
 </html>
-
-
-
