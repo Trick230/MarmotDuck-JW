@@ -2,12 +2,13 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>MarmotDuck Player</title>
+<title>Plyr Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
 
 <style>
+/* RESET BÁSICO */
 html, body {
   margin: 0;
   width: 100%;
@@ -16,77 +17,76 @@ html, body {
   font-family: Inter, system-ui, -apple-system, sans-serif;
 }
 
+/* COR PRINCIPAL */
+:root {
+  --plyr-color-main: rgba(19, 40, 253, 1);
+}
+
+/* PLAYER */
 .plyr {
   width: 100%;
   height: 100%;
   background: #000;
 }
 
-/* NOVA COR */
-:root {
-  --plyr-color-main: rgba(19, 40, 253, 1);
-  --plyr-control-icon-size: 24px; /* aumentei o tamanho dos ícones */
-  --plyr-control-spacing: 12px;
-}
-
+/* CONTROLS BAR – LIMPA E NEUTRA */
 .plyr__controls {
-  background: linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,0));
-  padding: 20px 16px; /* HUD maior */
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,.85),
+    rgba(0,0,0,.3),
+    transparent
+  );
+  padding: 16px 16px 14px;
 }
 
-.plyr--hide-controls .plyr__controls {
-  opacity: 0;
-}
-
+/* BOTÕES – TAMANHO PADRÃO, ALINHAMENTO PERFEITO */
 .plyr__control {
   background: transparent;
   opacity: .9;
-  min-width: 48px; /* botões maiores */
-  min-height: 48px;
-  transition: opacity 0.2s ease; /* removida escala */
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  line-height: 1;
 }
 
 .plyr__control:hover {
   opacity: 1;
 }
 
-.plyr__control--overlaid {
-  background: rgba(0,0,0,.8);
-  border: 2px solid rgba(255,255,255,.4);
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* SVGs – NÃO MEXER NO TAMANHO PADRÃO */
+.plyr__control svg {
+  display: block;
 }
 
-.plyr__control--overlaid svg {
-  width: 36px;
-  height: 36px;
-}
-
+/* PROGRESS BAR – PADRÃO */
 .plyr__progress input[type=range],
 .plyr__progress__buffer {
-  height: 4px; /* barra maior */
+  height: 4px;
 }
 
 .plyr__progress__buffer {
   color: rgba(255,255,255,.25);
 }
 
+/* TEMPO */
 .plyr__time {
-  font-size: 14px;
+  font-size: 13px;
   opacity: .85;
 }
 
+/* MENUS (SETTINGS / SPEED) */
 .plyr__menu__container {
   background: rgba(20,20,20,.95);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(8px);
 }
 
-.plyr__controls [data-plyr="download"] {
-  display: none !important;
+/* GARANTIR PLAY LARGE PADRÃO */
+.plyr__control--overlaid {
+  all: unset;
 }
 </style>
 </head>
@@ -104,10 +104,9 @@ const poster = params.get('poster');
 if (videoUrl) {
   const video = document.getElementById('player');
   video.src = decodeURIComponent(videoUrl);
-  if (poster) video.setAttribute('poster', decodeURIComponent(poster));
+  if (poster) video.poster = decodeURIComponent(poster);
 
   new Plyr(video, {
-    ratio: '16:9',
     storage: { enabled: false },
     volume: 1.0,
     hideControls: false,
