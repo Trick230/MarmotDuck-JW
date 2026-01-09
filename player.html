@@ -22,8 +22,9 @@ html, body {
   background: #000;
 }
 
+/* NOVA COR */
 :root {
-  --plyr-color-main: #e50914;
+  --plyr-color-main: #1328fd;
   --plyr-control-icon-size: 16px;
   --plyr-control-spacing: 10px;
 }
@@ -101,14 +102,18 @@ if (videoUrl) {
     resetOnEnd: true,
     controls: [
       'play-large',
+      'rewind',
       'play',
+      'fast-forward',
       'progress',
       'current-time',
       'mute',
       'volume',
       'settings',
       'fullscreen'
-    ]
+    ],
+    settings: ['speed'],
+    keyboard: { focused: true, global: true }
   });
 } else {
   document.body.innerHTML =
