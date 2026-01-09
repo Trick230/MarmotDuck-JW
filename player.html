@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Player</title>
+<title>Netflix Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
@@ -13,92 +13,88 @@ html, body {
   width: 100%;
   height: 100%;
   background: #000;
-  font-family: Inter, system-ui, -apple-system, sans-serif;
+  font-family: Netflix Sans, Inter, system-ui, sans-serif;
 }
 
 :root {
-  --plyr-color-main: rgb(19, 40, 253);
-  --plyr-control-icon-size: 24px;
-  --plyr-control-spacing: 12px;
+  --plyr-color-main: #e50914;
+  --plyr-control-icon-size: 22px;
 }
 
 .plyr {
   width: 100%;
   height: 100%;
-  background: #000;
 }
 
-/* CONTROLS BAR */
+/* CONTROLS BAR – NETFLIX */
 .plyr__controls {
-  background: linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,0));
-  padding: 20px 16px;
+  background: linear-gradient(
+    to top,
+    rgba(0,0,0,.95),
+    rgba(0,0,0,.4),
+    transparent
+  );
+  padding: 24px 24px 20px;
 }
 
-.plyr--hide-controls .plyr__controls {
-  opacity: 0;
-}
-
-/* BOTÕES – CENTRO PERFEITO + MOVE/SCALE */
+/* BOTÕES LIMPOS */
 .plyr__control {
   background: transparent;
-  opacity: .9;
+  opacity: .85;
 
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0;
-  line-height: 1;
-
   transition:
-    transform 0.18s ease,
-    opacity 0.2s ease;
+    transform .15s ease,
+    opacity .15s ease;
 }
 
 .plyr__control:hover {
   opacity: 1;
-  transform: translateY(-2px) scale(1.08);
+  transform: scale(1.15);
 }
 
-.plyr__control:active {
-  transform: scale(0.96);
-}
-
-/* SVGs – FIX DEFINITIVO DO DESALINHAMENTO */
+/* SVG CENTER FIX */
 .plyr__control svg {
   width: var(--plyr-control-icon-size);
   height: var(--plyr-control-icon-size);
-
   display: block;
-  flex-shrink: 0;
-
-  margin: 0;
-  padding: 0;
 }
 
-/* PROGRESS */
+/* PLAY LARGE – PADRÃO, SÓ ESCALA */
+.plyr__control--overlaid {
+  transform: scale(1.15);
+}
+
+.plyr__control--overlaid:hover {
+  transform: scale(1.25);
+}
+
+/* PROGRESS – NETFLIX STYLE */
 .plyr__progress input[type=range],
 .plyr__progress__buffer {
-  height: 4px;
+  height: 3px;
 }
 
-.plyr__progress__buffer {
-  color: rgba(255,255,255,.25);
+.plyr__progress:hover input[type=range] {
+  height: 5px;
 }
 
 /* TIME */
 .plyr__time {
-  font-size: 14px;
-  opacity: .85;
+  font-size: 13px;
+  opacity: .75;
 }
 
-/* MENUS */
+/* SETTINGS MENU */
 .plyr__menu__container {
-  background: rgba(20,20,20,.95);
-  backdrop-filter: blur(10px);
+  background: rgba(0,0,0,.95);
+  backdrop-filter: blur(12px);
 }
 </style>
 </head>
@@ -121,27 +117,20 @@ if (videoUrl) {
   new Plyr(video, {
     ratio: '16:9',
     storage: { enabled: false },
-    volume: 1,
     clickToPlay: true,
     resetOnEnd: true,
     controls: [
       'play-large',
       'play',
-      'rewind',
-      'fast-forward',
       'progress',
       'current-time',
       'mute',
-      'pip',
       'settings',
       'fullscreen'
     ],
     settings: ['speed'],
     keyboard: { focused: true, global: true }
   });
-} else {
-  document.body.innerHTML =
-    '<p style="color:#fff;text-align:center;margin-top:20px">Vídeo não encontrado</p>';
 }
 </script>
 
