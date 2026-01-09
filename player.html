@@ -30,6 +30,41 @@ html, body {
     sans-serif;
 }
 
+/* Aumenta o tamanho base dos controles */
+.plyr {
+  font-size: 1.4rem; /* 1.4x o tamanho padrão, ajuste conforme quiser */
+}
+
+/* Botões maiores */
+.plyr__control {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+/* Ícones dentro dos botões */
+.plyr__control svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Botão play grande (play-large) */
+.plyr__control--overlaid {
+  width: 120px;
+  height: 120px;
+}
+
+.plyr__control--overlaid svg {
+  width: 60px;
+  height: 60px;
+}
+
+/* Progresso da barra */
+.plyr__progress input[type=range] {
+  height: 12px; /* barra mais grossa */
+}
+
 /* CONTROLES – ANIMAÇÃO SUAVE */
 .plyr__controls {
   animation: fadeUp .25s ease;
@@ -100,7 +135,3 @@ if (videoUrl) {
 
 </body>
 </html>
-
-
-
-
