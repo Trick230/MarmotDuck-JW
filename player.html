@@ -102,7 +102,7 @@
     const forwardContainer = rewindContainer.cloneNode(true);
     const forwardDisplayButton = forwardContainer.querySelector(".jw-icon-rewind");
     forwardDisplayButton.style.transform = "scaleX(-1)";
-    forwardDisplayButton.ariaLabel = "Forward 10 Seconds";
+    forwardDisplayButton.ariaLabel = "";
 
     const nextContainer = playerContainer.querySelector(".jw-display-icon-next");
     nextContainer.parentNode.insertBefore(forwardContainer, nextContainer);
@@ -112,7 +112,7 @@
     const rewindControlBarButton = buttonContainer.querySelector(".jw-icon-rewind");
     const forwardControlBarButton = rewindControlBarButton.cloneNode(true);
     forwardControlBarButton.style.transform = "scaleX(-1)";
-    forwardControlBarButton.ariaLabel = "Forward 10 Seconds";
+    forwardControlBarButton.ariaLabel = "";
 
     rewindControlBarButton.parentNode.insertBefore(
       forwardControlBarButton,
@@ -129,4 +129,5 @@
 
 </body>
 </html>
+
 
