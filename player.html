@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <title>Player</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
 
 <style>
-/* ===== RESET ===== */
 html, body {
   margin: 0;
   width: 100%;
@@ -16,94 +16,72 @@ html, body {
   font-family: Inter, system-ui, -apple-system, sans-serif;
 }
 
-/* ===== PLAYER BASE ===== */
 .plyr {
   width: 100%;
   height: 100%;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  background: #000;
 }
 
-/* ===== THEME ===== */
 :root {
-  --plyr-color-main: #00c2ff;
-  --plyr-control-icon-size: 18px;
-  --plyr-control-spacing: 12px;
-  --plyr-control-radius: 10px;
+  --plyr-color-main: #e50914;
+  --plyr-control-icon-size: 16px;
+  --plyr-control-spacing: 10px;
 }
 
-/* ===== CONTROLS ===== */
 .plyr__controls {
-  background: linear-gradient(
-    to top,
-    rgba(0,0,0,.85),
-    rgba(0,0,0,.25)
-  );
-  padding: 12px 16px;
+  background: linear-gradient(to top, rgba(0,0,0,.9), rgba(0,0,0,0));
+  padding: 16px;
+}
+
+.plyr--hide-controls .plyr__controls {
+  opacity: 0;
 }
 
 .plyr__control {
-  border-radius: 10px;
-  transition: background .2s ease, transform .15s ease;
+  background: transparent;
+  opacity: .9;
 }
 
 .plyr__control:hover {
-  background: rgba(255,255,255,.12);
-  transform: scale(1.05);
+  opacity: 1;
+  transform: scale(1.15);
 }
 
-/* ===== PLAY CENTRAL ===== */
 .plyr__control--overlaid {
   background: rgba(0,0,0,.6);
-  border: 2px solid rgba(255,255,255,.15);
-  width: 72px;
-  height: 72px;
+  border: 2px solid rgba(255,255,255,.4);
+  width: 84px;
+  height: 84px;
 }
 
-.plyr__control--overlaid:hover {
-  background: rgba(0,0,0,.8);
-}
-
-/* ===== PROGRESS BAR ===== */
-.plyr__progress input[type=range] {
-  color: var(--plyr-color-main);
+.plyr__progress input[type=range],
+.plyr__progress__buffer {
+  height: 3px;
 }
 
 .plyr__progress__buffer {
   color: rgba(255,255,255,.25);
 }
 
-/* ===== TIME ===== */
 .plyr__time {
-  font-size: 13px;
-  opacity: .85;
+  font-size: 12px;
+  opacity: .75;
 }
 
-/* ===== SETTINGS MENU ===== */
 .plyr__menu__container {
   background: rgba(20,20,20,.95);
-  backdrop-filter: blur(8px);
-  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
-/* ===== REMOVE DOWNLOAD ===== */
 .plyr__controls [data-plyr="download"] {
   display: none !important;
-}
-
-/* ===== MOBILE ===== */
-@media (max-width: 768px) {
-  .plyr__controls {
-    padding: 10px;
-  }
 }
 </style>
 </head>
 
 <body>
 
-<video id="player" playsinline></video>
+<video id="player" playsinline controls></video>
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
@@ -114,14 +92,13 @@ const poster = params.get('poster');
 if (videoUrl) {
   const video = document.getElementById('player');
   video.src = decodeURIComponent(videoUrl);
-  if (poster) video.setAttribute('poster', poster);
+  if (poster) video.setAttribute('poster', decodeURIComponent(poster));
 
   new Plyr(video, {
     ratio: '16:9',
-    autoplay: false,
     hideControls: true,
     clickToPlay: true,
-    tooltips: { controls: true, seek: true },
+    resetOnEnd: true,
     controls: [
       'play-large',
       'play',
