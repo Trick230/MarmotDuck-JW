@@ -2,135 +2,126 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Plyr Player</title>
+<title>Shaka Player</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
-<link
-  href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
-  rel="stylesheet"
-/>
+<!-- Shaka Player -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/shaka-player.compiled.js"></script>
 
 <style>
-:root {
-  --plyr-color-main: rgba(19, 40, 253, 1);
-}
-
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;
-  font-family:
-    "Poppins",
-    Helvetica,
-    Arial,
-    Inter,
-    system-ui,
-    sans-serif;
-}
-
-/* Aumenta o tamanho base dos controles */
-.plyr {
-  font-size: 1.4rem; /* 1.4x o tamanho padrão, ajuste conforme quiser */
-}
-
-/* Botões maiores */
-.plyr__control {
-  width: 50px;
-  height: 50px;
-  min-width: 50px;
-  min-height: 50px;
-}
-
-/* Ícones dentro dos botões */
-.plyr__control svg {
-  width: 28px;
-  height: 28px;
-}
-
-/* Botão play grande (play-large) */
-.plyr__control--overlaid {
-  width: 120px;
-  height: 120px;
-}
-
-.plyr__control--overlaid svg {
-  width: 60px;
-  height: 60px;
-}
-
-/* Progresso da barra */
-.plyr__progress input[type=range] {
-  height: 12px; /* barra mais grossa */
-}
-
-/* CONTROLES – ANIMAÇÃO SUAVE */
-.plyr__controls {
-  animation: fadeUp .25s ease;
-}
-
-/* BOTÕES – ANIMAÇÃO LEVE */
-.plyr__control {
-  transition:
-    opacity .15s ease;
-}
-
-.plyr__control:hover {
-  transform: scale(1.08);
-}
-
-/* KEYFRAMES */
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
+  /* Reset básico */
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Poppins", sans-serif;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  /* Player container */
+  #video-container {
+    position: relative;
+    width: 80%;
+    max-width: 1280px;
   }
-}
+
+  /* Vídeo em si */
+  video {
+    width: 100%;
+    height: auto;
+    background-color: #000;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+  }
+
+  /* Controles customizados */
+  #controls {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    right: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+  }
+
+  #controls button {
+    pointer-events: all;
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: #fff;
+    padding: 8px 12px;
+    margin: 0 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: transform .2s ease, background .2s ease;
+  }
+
+  #controls button:hover {
+    transform: scale(1.1);
+    background: rgba(19, 40, 253, 0.8);
+  }
+
+  /* Fullscreen botão maior */
+  #fullscreen-btn {
+    font-size: 1.2rem;
+  }
+
 </style>
 </head>
 
 <body>
 
-<video id="player" playsinline controls></video>
+<div id="video-container">
+  <video id="video" controls poster="">
+    Seu navegador não suporta HTML5 vídeo.
+  </video>
+</div>
 
-<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
-const params = new URLSearchParams(window.location.search);
-const videoUrl = params.get('video');
-const poster = params.get('poster');
+  // Inicialização do Shaka Player
+  async function initPlayer() {
+    const video = document.getElementById('video');
 
-if (videoUrl) {
-  const video = document.getElementById('player');
-  video.src = decodeURIComponent(videoUrl);
-  if (poster) video.poster = decodeURIComponent(poster);
+    // Verifica suporte
+    if (!shaka.Player.isBrowserSupported()) {
+      alert("Shaka Player não é suportado neste navegador.");
+      return;
+    }
 
-  new Plyr(video, {
-    storage: { enabled: false },
-    volume: 1.0,
-    hideControls: false,
-    clickToPlay: true,
-    resetOnEnd: true,
-    controls: [
-      'play-large',
-      'play',
-      'rewind',
-      'fast-forward',
-      'progress',
-      'current-time',
-      'mute',
-      'pip',
-      'settings',
-      'fullscreen'
-    ],
-    settings: ['speed'],
-    keyboard: { focused: true, global: true }
-  });
-}
+    const player = new shaka.Player(video);
+
+    // Erros
+    player.addEventListener('error', event => {
+      console.error('Shaka Player error', event.detail);
+    });
+
+    // Carregar vídeo via URL de query string
+    const params = new URLSearchParams(window.location.search);
+    const videoUrl = params.get('video'); // exemplo: ?video=https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8
+    const poster = params.get('poster');
+
+    if (poster) video.poster = decodeURIComponent(poster);
+
+    if (videoUrl) {
+      try {
+        await player.load(decodeURIComponent(videoUrl));
+        console.log('Vídeo carregado com sucesso!');
+      } catch (err) {
+        console.error('Erro ao carregar vídeo', err);
+      }
+    } else {
+      console.warn('Nenhum vídeo fornecido na URL.');
+    }
+  }
+
+  window.addEventListener('load', initPlayer);
 </script>
 
 </body>
