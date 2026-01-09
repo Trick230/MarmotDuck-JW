@@ -24,7 +24,7 @@ html, body {
 
 /* NOVA COR */
 :root {
-  --plyr-color-main: #1328fd;
+  --plyr-color-main: rgba(19, 40, 253, 1);
   --plyr-control-icon-size: 16px;
   --plyr-control-spacing: 10px;
 }
@@ -97,7 +97,7 @@ if (videoUrl) {
 
   new Plyr(video, {
     ratio: '16:9',
-    hideControls: true,
+    hideControls: false,
     clickToPlay: true,
     resetOnEnd: true,
     controls: [
@@ -123,3 +123,4 @@ if (videoUrl) {
 
 </body>
 </html>
+
