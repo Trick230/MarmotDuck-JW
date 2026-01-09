@@ -97,18 +97,21 @@ if (videoUrl) {
 
   new Plyr(video, {
     ratio: '16:9',
+    storage: { enabled: false },
+    volume: 1.0
     hideControls: false,
     clickToPlay: true,
     resetOnEnd: true,
     controls: [
       'play-large',
-      'rewind',
       'play',
+      'rewind',
       'fast-forward',
       'progress',
       'current-time',
       'mute',
       'volume',
+      'pip',
       'settings',
       'fullscreen'
     ],
@@ -123,4 +126,3 @@ if (videoUrl) {
 
 </body>
 </html>
-
