@@ -63,8 +63,8 @@
           {
             file: decodeURIComponent(videoSubs),
             kind: "captions", // Pode ser "subtitles" se preferir
-            label: "Legendado",
-            default: true
+            label: decodeURIComponent(videoSubsLabel),
+            default: false
           }
         ]
       : []
