@@ -34,15 +34,14 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const videoSrc = params.get("src");
-  const videoTitle = params.get("title") || "Título Padrão"; // pega do link ou usa padrão
+  const videoSubs = params.get("subs"); // Novo parâmetro para legendas
+  const videoTitle = params.get("title") || "Título Padrão";
 
   if (!videoSrc) {
     document.body.innerHTML =
       "<p style='color:white;text-align:center;margin-top:20px'>Nenhum vídeo fornecido</p>";
     throw new Error("SRC não informado");
   }
-
-  const videoType = videoSrc.includes(".m3u8") || videoSrc.includes(".txt") ? "hls" : "mp4";
 
   const playerInstance = jwplayer("player").setup({
     controls: true,
@@ -56,10 +55,19 @@
     volume: 100,
     skin: { name: "netflix" },
     file: decodeURIComponent(videoSrc),
-
     title: decodeURIComponent(videoTitle),
     description: "Estás a assistir",
     image: "https://modocineplus.com/embed/image.php?id=439079&raw=1",
+    tracks: videoSubs
+      ? [
+          {
+            file: decodeURIComponent(videoSubs),
+            kind: "captions", // Pode ser "subtitles" se preferir
+            label: "Legendado",
+            default: true
+          }
+        ]
+      : []
   });
 
   // BOTÃO DOWNLOAD + FORWARD 10s
@@ -115,5 +123,3 @@
 
 </body>
 </html>
-
-
