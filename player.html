@@ -1,46 +1,125 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Player</title>
+  <meta charset="UTF-8">
+  <title>Player JW</title>
 
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+  <!-- CSS Netflix -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wilson959/player@master/Netflix_3.css">
 
-<style>
-html, body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;
-}
-video {
-  width: 100%;
-  height: 100%;
-}
-</style>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+    }
+
+    #player {
+      position: absolute;
+      width: 100% !important;
+      height: 100% !important;
+    }
+  </style>
 </head>
+
 <body>
 
-<video id="player" controls playsinline></video>
+<div id="player"></div>
 
-<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+<!-- JW Player -->
+<script src="https://cdn.jwplayer.com/libraries/DV3FtaT5.js"></script>
+
 <script>
-const params = new URLSearchParams(window.location.search);
-const videoUrl = params.get('video');
+  const params = new URLSearchParams(window.location.search);
+  const videoSrc = params.get("src");
+  const videoSubs = params.get("subs");
+  const videoSubsLabel = params.get("subsLabel") || "Legenda";
+  const videoTitle = params.get("title") || "Título";
 
-if (videoUrl) {
-  const video = document.getElementById('player');
-  video.src = decodeURIComponent(videoUrl);
+  if (!videoSrc) {
+    document.body.innerHTML =
+      "<p style='color:white;text-align:center;margin-top:20px'>Nenhum vídeo fornecido</p>";
+    throw new Error("SRC não informado");
+  }
 
-  new Plyr(video, {
-    controls: [
-      'play','progress','current-time',
-      'mute','volume','settings','fullscreen'
-    ]
+  const playerInstance = jwplayer("player").setup({
+    controls: true,
+    sharing: false,
+    hlshtml: true,
+    preload: true,
+    displaytitle: true,
+    displaydescription: true,
+    abouttext: "",
+    aboutlink: "",
+    volume: 100,
+    skin: { name: "netflix" },
+    file: decodeURIComponent(videoSrc),
+    title: decodeURIComponent(videoTitle),
+    description: "Estás a assistir",
+    image: "https://modocineplus.com/embed/image.php?id=439079&raw=1",
+    tracks: videoSubs
+      ? [
+          {
+            file: decodeURIComponent(videoSubs),
+            kind: "captions",
+            label: decodeURIComponent(videoSubsLabel),
+            default: true
+          }
+        ]
+      : []
   });
-} else {
-  document.body.innerHTML = '<p style="color:#fff;text-align:center">Vídeo não encontrado</p>';
-}
+
+  // BOTÃO DOWNLOAD + FORWARD 10s
+  playerInstance.on("ready", function () {
+    const buttonId = "download-video-button";
+    const iconPath = "";
+    const tooltipText = "Download Video";
+
+    playerInstance.addButton(iconPath, tooltipText, buttonClickAction, buttonId);
+
+    function buttonClickAction() {
+      const playlistItem = playerInstance.getPlaylistItem();
+      const anchor = document.createElement("a");
+      anchor.href = playlistItem.file;
+      anchor.download = playlistItem.file.split("/").pop();
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    }
+
+    const playerContainer = playerInstance.getContainer();
+    const buttonContainer = playerContainer.querySelector(".jw-button-container");
+
+    // DISPLAY forward
+    const rewindContainer = playerContainer.querySelector(".jw-display-icon-rewind");
+    const forwardContainer = rewindContainer.cloneNode(true);
+    const forwardDisplayButton = forwardContainer.querySelector(".jw-icon-rewind");
+    forwardDisplayButton.style.transform = "scaleX(-1)";
+    forwardDisplayButton.ariaLabel = "";
+
+    const nextContainer = playerContainer.querySelector(".jw-display-icon-next");
+    nextContainer.parentNode.insertBefore(forwardContainer, nextContainer);
+    nextContainer.style.display = "none";
+
+    // CONTROL BAR forward
+    const rewindControlBarButton = buttonContainer.querySelector(".jw-icon-rewind");
+    const forwardControlBarButton = rewindControlBarButton.cloneNode(true);
+    forwardControlBarButton.style.transform = "scaleX(-1)";
+    forwardControlBarButton.ariaLabel = "";
+
+    rewindControlBarButton.parentNode.insertBefore(
+      forwardControlBarButton,
+      rewindControlBarButton.nextElementSibling
+    );
+
+    [forwardDisplayButton, forwardControlBarButton].forEach((button) => {
+      button.onclick = () => {
+        playerInstance.seek(playerInstance.getPosition() + 10);
+      };
+    });
+  });
 </script>
 
 </body>
