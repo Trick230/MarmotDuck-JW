@@ -32,9 +32,9 @@
 <script src="https://cdn.jwplayer.com/libraries/DV3FtaT5.js"></script>
 
 <script>
-  // 🔹 LÊ O LINK DO VÍDEO PELO IFRAME
   const params = new URLSearchParams(window.location.search);
   const videoSrc = params.get("src");
+  const videoTitle = params.get("title") || "Título Padrão"; // pega do link ou usa padrão
 
   if (!videoSrc) {
     document.body.innerHTML =
@@ -42,10 +42,7 @@
     throw new Error("SRC não informado");
   }
 
-  // Detecta tipo automaticamente
-  const videoType = videoSrc.includes(".m3u8") || videoSrc.includes(".txt")
-    ? "hls"
-    : "mp4";
+  const videoType = videoSrc.includes(".m3u8") || videoSrc.includes(".txt") ? "hls" : "mp4";
 
   const playerInstance = jwplayer("player").setup({
     controls: true,
@@ -56,12 +53,10 @@
     displaydescription: true,
     abouttext: "",
     aboutlink: "",
-    skin: {
-      name: "netflix"
-    },
+    skin: { name: "netflix" },
     playlist: [
       {
-        title: "1",
+        title: decodeURIComponent(videoTitle), // define o título do vídeo
         description: "Estás a assistir",
         image: "https://modocineplus.com/embed/image.php?id=439079&raw=1",
         sources: [
@@ -76,7 +71,7 @@
     ]
   });
 
-  // 🔹 BOTÃO DOWNLOAD + FORWARD 10s (mantido igual)
+  // BOTÃO DOWNLOAD + FORWARD 10s
   playerInstance.on("ready", function () {
     const buttonId = "download-video-button";
     const iconPath = "";
@@ -129,4 +124,3 @@
 
 </body>
 </html>
-
