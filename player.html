@@ -55,21 +55,11 @@
     aboutlink: "",
     volume: 100,
     skin: { name: "netflix" },
-    playlist: [
-      {
-        title: decodeURIComponent(videoTitle), // define o título do vídeo
-        description: "Estás a assistir",
-        image: "https://modocineplus.com/embed/image.php?id=439079&raw=1",
-        sources: [
-          {
-            file: decodeURIComponent(videoSrc),
-            type: videoType
-          }
-        ],
-        captions: [],
-        tracks: []
-      }
-    ]
+    file: decodeURIComponent(videoSrc),
+
+    title: decodeURIComponent(videoTitle),
+    description: "Estás a assistir",
+    image: "https://modocineplus.com/embed/image.php?id=439079&raw=1",
   });
 
   // BOTÃO DOWNLOAD + FORWARD 10s
@@ -125,4 +115,5 @@
 
 </body>
 </html>
+
 
