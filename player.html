@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title></title>
+  <title>MarmotDuck Player</title>
 
   <!-- CSS Netflix -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wilson959/player@master/Netflix_3.css">
@@ -34,8 +34,9 @@
 <script>
   const params = new URLSearchParams(window.location.search);
   const videoSrc = params.get("src");
-  const videoSubs = params.get("subs"); // Novo parâmetro para legendas
-  const videoTitle = params.get("title") || "Título Padrão";
+  const videoSubs = params.get("subs");               // link da legenda
+  const videoSubsLabel = params.get("subsLabel") || "Legenda"; // label padrão
+  const videoTitle = params.get("title") || "Título";
 
   if (!videoSrc) {
     document.body.innerHTML =
@@ -62,9 +63,9 @@
       ? [
           {
             file: decodeURIComponent(videoSubs),
-            kind: "captions", // Pode ser "subtitles" se preferir
+            kind: "captions",
             label: decodeURIComponent(videoSubsLabel),
-            default: false
+            default: true
           }
         ]
       : []
