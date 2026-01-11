@@ -73,6 +73,7 @@
 
   // BOTÃO DOWNLOAD + FORWARD 10s
   playerInstance.on("ready", function () {
+    playerInstance.setCaptions({ mode: "hidden" });
     const buttonId = "download-video-button";
     const iconPath = "";
     const tooltipText = "Download Video";
@@ -124,3 +125,4 @@
 
 </body>
 </html>
+
