@@ -10,6 +10,7 @@
     *, *::before, *::after { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
     #player { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+    #player iframe { pointer-events: none; }
     #error { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #fff; font: 16px/1.5 sans-serif; text-align: center; padding: 24px; }
     #error.show { display: flex; }
     #error span { font-size: 13px; opacity: .5; }
@@ -28,7 +29,8 @@
 (function () {
 
   /* ── bloquear botão direito ── */
-  document.addEventListener("contextmenu", e => e.preventDefault());
+  const blockCtx = e => e.preventDefault();
+  document.addEventListener("contextmenu", blockCtx, true);
 
   /* ── helpers ── */
   const decode = (val, fallback = "") => {
@@ -73,6 +75,12 @@
   /* ── ready ── */
   player.on("ready", () => {
     player.setCaptions({ mode: "hidden" });
+
+    // bloqueia botão direito nos iframes internos do JW Player
+    document.querySelectorAll("iframe").forEach(f => {
+      try { f.contentDocument.addEventListener("contextmenu", blockCtx, true); }
+      catch {}
+    });
 
     // download
     player.addButton("", "Download", () => {
