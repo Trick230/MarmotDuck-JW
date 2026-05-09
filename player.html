@@ -7,118 +7,127 @@
   <link rel="icon" href="data:image/x-icon;base64,AA">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wilson959/player@master/Netflix_3.css">
   <style>
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
     #player { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+    #error { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #fff; font: 16px/1.5 sans-serif; text-align: center; padding: 24px; }
+    #error.show { display: flex; }
+    #error span { font-size: 13px; opacity: .5; }
   </style>
 </head>
 <body>
+
 <div id="player"></div>
+<div id="error">
+  <p id="error-msg">Erro ao carregar o vídeo.</p>
+  <span id="error-code"></span>
+</div>
+
 <script src="https://cdn.jwplayer.com/libraries/DV3FtaT5.js"></script>
 <script>
-  (function () {
-    const params = new URLSearchParams(window.location.search);
-    const videoSrc = params.get("src");
+(function () {
 
-    if (!videoSrc) {
-      document.body.innerHTML = "<p style='color:#fff;text-align:center;padding:40px;font-family:sans-serif'>Nenhum vídeo fornecido.</p>";
-      return;
-    }
+  /* ── bloquear botão direito ── */
+  document.addEventListener("contextmenu", e => e.preventDefault());
 
-    const decode = (val, fallback = "") => val ? decodeURIComponent(val) : fallback;
+  /* ── helpers ── */
+  const decode = (val, fallback = "") => {
+    try { return val ? decodeURIComponent(val) : fallback; }
+    catch { return fallback; }
+  };
 
-    const videoSubs    = params.get("subs");
-    const videoTitle   = decode(params.get("title"), "Título");
-    const subsLabel    = decode(params.get("subsLabel"), "Legenda");
+  const showError = (msg = "Erro ao carregar o vídeo.", code = "") => {
+    document.getElementById("error-msg").textContent  = msg;
+    document.getElementById("error-code").textContent = code ? `Código: ${code}` : "";
+    document.getElementById("error").classList.add("show");
+  };
 
-    const tracks = videoSubs ? [{
-      file: decode(videoSubs),
-      kind: "captions",
-      label: subsLabel,
-      default: false
-    }] : [];
+  /* ── params ── */
+  const p         = new URLSearchParams(window.location.search);
+  const src       = p.get("src");
+  const subs      = p.get("subs");
+  const title     = decode(p.get("title"),    "Título");
+  const subsLabel = decode(p.get("subsLabel"), "Legenda");
 
-    const player = jwplayer("player").setup({
-      file: decode(videoSrc),
-      title: videoTitle,
-      description: "Estás a assistir",
-      tracks,
-      controls: true,
-      pip: true,
-      sharing: false,
-      hlshtml: true,
-      preload: "none",
-      displaytitle: true,
-      displaydescription: true,
-      abouttext: "",
-      aboutlink: "",
-      contextmenu: false,
-      volume: 100,
-      skin: { name: "netflix" },
-      // Melhora performance em HLS
-      hlsconfig: {
-        maxBufferLength: 30,
-        maxMaxBufferLength: 60,
-        startLevel: -1 // auto qualidade
-      }
-    });
+  if (!src) { showError("Nenhum vídeo fornecido."); return; }
 
-    player.on("ready", function () {
-      player.setCaptions({ mode: "hidden" });
+  /* ── setup ── */
+  const player = jwplayer("player").setup({
+    file        : decode(src),
+    title,
+    tracks      : subs ? [{ file: decode(subs), kind: "captions", label: subsLabel, default: false }] : [],
+    controls    : true,
+    pip         : true,
+    sharing     : false,
+    hlshtml     : true,
+    preload     : "none",
+    displaytitle: true,
+    abouttext   : "",
+    aboutlink   : "",
+    contextmenu : false,
+    volume      : 100,
+    skin        : { name: "netflix" },
+    hlsconfig   : { maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 }
+  });
 
-      // Botão download
-      player.addButton("", "Download", function () {
-        const url = player.getPlaylistItem().file;
-        const a = Object.assign(document.createElement("a"), {
-          href: url,
-          download: url.split("/").pop()
-        });
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-      }, "download-video-button");
+  /* ── ready ── */
+  player.on("ready", () => {
+    player.setCaptions({ mode: "hidden" });
 
-      // Botão avançar 10s
-      const container  = player.getContainer();
-      const btnBar     = container.querySelector(".jw-button-container");
-      const rwDisplay  = container.querySelector(".jw-display-icon-rewind");
-      const rwBar      = btnBar.querySelector(".jw-icon-rewind");
+    // download
+    player.addButton("", "Download", () => {
+      const url = player.getPlaylistItem().file;
+      if (!url || url.endsWith(".m3u8")) return;
+      Object.assign(document.createElement("a"), { href: url, download: url.split("/").pop() }).click();
+    }, "download-video-button");
 
-      // Esconde botão next do display central
-      const nextDisplay = container.querySelector(".jw-display-icon-next");
-      if (nextDisplay) nextDisplay.style.display = "none";
+    // botão avançar 10s
+    const c           = player.getContainer();
+    const rwDisplay   = c.querySelector(".jw-display-icon-rewind");
+    const rwBar       = c.querySelector(".jw-button-container .jw-icon-rewind");
+    const nextDisplay = c.querySelector(".jw-display-icon-next");
 
-      // Cria botão forward para display central e barra
-      [[rwDisplay, ".jw-icon-rewind", true], [rwBar, null, false]].forEach(([ref, selector, isDisplay]) => {
-        if (!ref) return;
-        const clone = ref.cloneNode(true);
-        const btn   = isDisplay ? clone.querySelector(selector) : clone;
-        btn.style.transform = "scaleX(-1)";
-        btn.ariaLabel = "Avançar 10s";
-        btn.onclick = () => player.seek(player.getPosition() + 10);
-        ref.parentNode.insertBefore(clone, ref.nextElementSibling);
-      });
-    });
+    if (nextDisplay) nextDisplay.style.display = "none";
 
-    // Atalhos de teclado
-    document.addEventListener("keydown", function (e) {
-      if (e.target.tagName === "INPUT") return;
-      switch (e.key) {
-        case "ArrowRight": player.seek(player.getPosition() + 10); break;
-        case "ArrowLeft":  player.seek(player.getPosition() - 10); break;
-        case "ArrowUp":    player.setVolume(Math.min(player.getVolume() + 10, 100)); break;
-        case "ArrowDown":  player.setVolume(Math.max(player.getVolume() - 10, 0)); break;
-        case " ":
-        case "k":
-          e.preventDefault();
-          player.getState() === "playing" ? player.pause() : player.play();
-          break;
-        case "m": player.setMute(!player.getMute()); break;
-        case "f": player.setFullscreen(!player.getFullscreen()); break;
-      }
-    });
+    const addForward = (ref, selector) => {
+      if (!ref) return;
+      const clone = ref.cloneNode(true);
+      const btn   = selector ? clone.querySelector(selector) : clone;
+      if (!btn) return;
+      btn.style.transform = "scaleX(-1)";
+      btn.setAttribute("aria-label", "Avançar 10s");
+      btn.onclick = () => player.seek(player.getPosition() + 10);
+      ref.after(clone);
+    };
 
-  })();
+    addForward(rwDisplay, ".jw-icon-rewind");
+    addForward(rwBar, null);
+  });
+
+  /* ── erros ── */
+  player.on("error",      e => showError("Erro ao carregar o vídeo.", e.code));
+  player.on("setupError", e => showError("Erro ao iniciar o player.", e.code));
+
+  /* ── teclado ── */
+  document.addEventListener("keydown", e => {
+    if (e.target.tagName === "INPUT" || e.target.isContentEditable) return;
+
+    const vol = player.getVolume();
+    const pos = player.getPosition();
+
+    ({
+      ArrowRight : () => player.seek(pos + 10),
+      ArrowLeft  : () => player.seek(pos - 10),
+      ArrowUp    : () => { e.preventDefault(); player.setVolume(Math.min(vol + 10, 100)); },
+      ArrowDown  : () => { e.preventDefault(); player.setVolume(Math.max(vol - 10, 0));  },
+      " "        : () => { e.preventDefault(); player.getState() === "playing" ? player.pause() : player.play(); },
+      k          : () => player.getState() === "playing" ? player.pause() : player.play(),
+      m          : () => player.setMute(!player.getMute()),
+      f          : () => player.setFullscreen(!player.getFullscreen()),
+    }[e.key] || (() => {}))();
+  });
+
+})();
 </script>
 </body>
 </html>
