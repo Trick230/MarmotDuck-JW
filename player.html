@@ -19,45 +19,46 @@
   </style>
 </head>
 <body>
-
+ 
 <div id="player"></div>
 <div id="error">
   <p id="error-msg">Erro ao carregar o vídeo.</p>
   <span id="error-code"></span>
 </div>
-
+ 
 <script src="https://cdn.jwplayer.com/libraries/DV3FtaT5.js"></script>
 <script>
 (function () {
-
+ 
   const blockCtx = e => e.preventDefault();
   document.addEventListener("contextmenu", blockCtx, true);
-
+ 
   const decode = (val, fallback = "") => {
     try { return val ? decodeURIComponent(val) : fallback; }
     catch { return fallback; }
   };
-
+ 
   const showError = (msg = "Erro ao carregar o vídeo.", code = "") => {
     document.getElementById("error-msg").textContent  = msg;
     document.getElementById("error-code").textContent = code ? `Código: ${code}` : "";
     document.getElementById("error").classList.add("show");
   };
-
+ 
   const p         = new URLSearchParams(window.location.search);
   const src       = p.get("src");
   const subs      = p.get("subs");
   const title     = decode(p.get("title"),    "Título");
   const subsLabel = decode(p.get("subsLabel"), "Legenda");
-
+ 
   if (!src) { showError("Nenhum vídeo fornecido."); return; }
-
+ 
   const player = jwplayer("player").setup({
     file              : decode(src),
     title,
     description       : "Estás a assistir",
     tracks            : subs ? [{ file: decode(subs), kind: "captions", label: subsLabel, default: false }] : [],
     controls          : true,
+    autostart         : true,
     pip               : true,
     sharing           : false,
     hlshtml           : true,
@@ -71,36 +72,34 @@
     skin              : { name: "netflix" },
     hlsconfig         : { maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 }
   });
-
+ 
   player.on("ready", () => {
     player.setCaptions({ mode: "hidden" });
-
+ 
     player.getContainer().addEventListener("contextmenu", blockCtx, true);
     document.querySelectorAll("iframe").forEach(f => {
       try { f.contentDocument.addEventListener("contextmenu", blockCtx, true); }
       catch {}
     });
 
-    const killMenu = () => {
-      const jwMenu = player.getContainer().querySelector(".jw-rightclick");
-      if (jwMenu) jwMenu.remove();
-    };
-    killMenu();
-    setTimeout(killMenu, 500);
-
+    new MutationObserver(() => {
+      const m = player.getContainer().querySelector(".jw-rightclick");
+      if (m) m.remove();
+    }).observe(player.getContainer(), { childList: true, subtree: true });
+ 
     player.addButton("", "Download", () => {
       const url = player.getPlaylistItem().file;
       if (!url || url.endsWith(".m3u8")) return;
       Object.assign(document.createElement("a"), { href: url, download: url.split("/").pop() }).click();
     }, "download-video-button");
-
+ 
     const c           = player.getContainer();
     const rwDisplay   = c.querySelector(".jw-display-icon-rewind");
     const rwBar       = c.querySelector(".jw-button-container .jw-icon-rewind");
     const nextDisplay = c.querySelector(".jw-display-icon-next");
-
+ 
     if (nextDisplay) nextDisplay.style.display = "none";
-
+ 
     const addForward = (ref, selector) => {
       if (!ref) return;
       const clone = ref.cloneNode(true);
@@ -111,20 +110,20 @@
       btn.onclick = () => player.seek(player.getPosition() + 10);
       ref.after(clone);
     };
-
+ 
     addForward(rwDisplay, ".jw-icon-rewind");
     addForward(rwBar, null);
   });
-
+ 
   player.on("error",      e => showError("Erro ao carregar o vídeo.", e.code));
   player.on("setupError", e => showError("Erro ao iniciar o player.", e.code));
-
+ 
   document.addEventListener("keydown", e => {
     if (e.target.tagName === "INPUT" || e.target.isContentEditable) return;
-
+ 
     const vol = player.getVolume();
     const pos = player.getPosition();
-
+ 
     ({
       ArrowRight : () => player.seek(pos + 10),
       ArrowLeft  : () => player.seek(pos - 10),
@@ -136,7 +135,7 @@
       f          : () => player.setFullscreen(!player.getFullscreen()),
     }[e.key] || (() => {}))();
   });
-
+ 
 })();
 </script>
 </body>
