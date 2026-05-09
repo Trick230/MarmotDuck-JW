@@ -58,7 +58,8 @@
     description       : "Estás a assistir",
     tracks            : subs ? [{ file: decode(subs), kind: "captions", label: subsLabel, default: false }] : [],
     controls          : true,
-    autostart         : true,
+    autostart         : "viewable",
+    mute              : false,
     pip               : true,
     sharing           : false,
     hlshtml           : true,
@@ -81,11 +82,13 @@
       try { f.contentDocument.addEventListener("contextmenu", blockCtx, true); }
       catch {}
     });
-
-    new MutationObserver(() => {
+ 
+    const menuObserver = new MutationObserver(() => {
       const m = player.getContainer().querySelector(".jw-rightclick");
       if (m) m.remove();
-    }).observe(player.getContainer(), { childList: true, subtree: true });
+    });
+    menuObserver.observe(player.getContainer(), { childList: true, subtree: true });
+    player.on("remove", () => menuObserver.disconnect());
  
     player.addButton("", "Download", () => {
       const url = player.getPlaylistItem().file;
@@ -102,17 +105,24 @@
  
     const addForward = (ref, selector) => {
       if (!ref) return;
-      const clone = ref.cloneNode(true);
-      const btn   = selector ? clone.querySelector(selector) : clone;
-      if (!btn) return;
-      btn.style.transform = "scaleX(-1)";
-      btn.setAttribute("aria-label", "Avançar 10s");
-      btn.onclick = () => player.seek(player.getPosition() + 10);
+      const clone = ref.cloneNode(false);
+      const inner = selector ? ref.querySelector(selector) : ref;
+      if (!inner) return;
+      const icon  = inner.cloneNode(true);
+      icon.style.transform = "scaleX(-1)";
+      icon.setAttribute("aria-label", "Avançar 10s");
+      clone.appendChild(icon);
+      clone.onclick = () => player.seek(player.getPosition() + 10);
       ref.after(clone);
     };
  
     addForward(rwDisplay, ".jw-icon-rewind");
     addForward(rwBar, null);
+  });
+ 
+  player.on("autoplayBlocked", () => {
+    player.setMute(true);
+    player.play();
   });
  
   player.on("error",      e => showError("Erro ao carregar o vídeo.", e.code));
