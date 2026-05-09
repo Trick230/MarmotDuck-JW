@@ -56,30 +56,31 @@
 
   /* ── setup ── */
   const player = jwplayer("player").setup({
-    file           : decode(src),
+    file              : decode(src),
     title,
-    description    : "Estás a assistir",
-    tracks         : subs ? [{ file: decode(subs), kind: "captions", label: subsLabel, default: false }] : [],
-    controls       : true,
-    pip            : true,
-    sharing        : false,
-    hlshtml        : true,
-    preload        : "none",
-    displaytitle   : true,
+    description       : "Estás a assistir",
+    tracks            : subs ? [{ file: decode(subs), kind: "captions", label: subsLabel, default: false }] : [],
+    controls          : true,
+    pip               : true,
+    sharing           : false,
+    hlshtml           : true,
+    preload           : "none",
+    displaytitle      : true,
     displaydescription: true,
-    abouttext      : "",
-    aboutlink      : "",
-    contextmenu    : false,
-    volume         : 100,
-    skin           : { name: "netflix" },
-    hlsconfig      : { maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 }
+    abouttext         : "",
+    aboutlink         : "",
+    contextmenu       : false,
+    volume            : 100,
+    skin              : { name: "netflix" },
+    hlsconfig         : { maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 }
   });
 
   /* ── ready ── */
   player.on("ready", () => {
     player.setCaptions({ mode: "hidden" });
 
-    // bloqueia botão direito nos iframes internos do JW Player
+    // bloqueia menu interno do JW Player e iframes
+    player.getContainer().addEventListener("contextmenu", blockCtx, true);
     document.querySelectorAll("iframe").forEach(f => {
       try { f.contentDocument.addEventListener("contextmenu", blockCtx, true); }
       catch {}
