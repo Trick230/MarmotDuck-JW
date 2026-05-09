@@ -12,6 +12,7 @@
     #player { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
     #player video { pointer-events: none; }
     #player iframe { pointer-events: none; }
+    .jw-rightclick { display: none !important; }
     #error { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #fff; font: 16px/1.5 sans-serif; text-align: center; padding: 24px; }
     #error.show { display: flex; }
     #error span { font-size: 13px; opacity: .5; }
@@ -29,11 +30,9 @@
 <script>
 (function () {
 
-  /* ── bloquear botão direito ── */
   const blockCtx = e => e.preventDefault();
   document.addEventListener("contextmenu", blockCtx, true);
 
-  /* ── helpers ── */
   const decode = (val, fallback = "") => {
     try { return val ? decodeURIComponent(val) : fallback; }
     catch { return fallback; }
@@ -45,7 +44,6 @@
     document.getElementById("error").classList.add("show");
   };
 
-  /* ── params ── */
   const p         = new URLSearchParams(window.location.search);
   const src       = p.get("src");
   const subs      = p.get("subs");
@@ -54,7 +52,6 @@
 
   if (!src) { showError("Nenhum vídeo fornecido."); return; }
 
-  /* ── setup ── */
   const player = jwplayer("player").setup({
     file              : decode(src),
     title,
@@ -75,25 +72,28 @@
     hlsconfig         : { maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 }
   });
 
-  /* ── ready ── */
   player.on("ready", () => {
     player.setCaptions({ mode: "hidden" });
 
-    // bloqueia menu interno do JW Player e iframes
     player.getContainer().addEventListener("contextmenu", blockCtx, true);
     document.querySelectorAll("iframe").forEach(f => {
       try { f.contentDocument.addEventListener("contextmenu", blockCtx, true); }
       catch {}
     });
 
-    // download
+    const killMenu = () => {
+      const jwMenu = player.getContainer().querySelector(".jw-rightclick");
+      if (jwMenu) jwMenu.remove();
+    };
+    killMenu();
+    setTimeout(killMenu, 500);
+
     player.addButton("", "Download", () => {
       const url = player.getPlaylistItem().file;
       if (!url || url.endsWith(".m3u8")) return;
       Object.assign(document.createElement("a"), { href: url, download: url.split("/").pop() }).click();
     }, "download-video-button");
 
-    // botão avançar 10s
     const c           = player.getContainer();
     const rwDisplay   = c.querySelector(".jw-display-icon-rewind");
     const rwBar       = c.querySelector(".jw-button-container .jw-icon-rewind");
@@ -116,11 +116,9 @@
     addForward(rwBar, null);
   });
 
-  /* ── erros ── */
   player.on("error",      e => showError("Erro ao carregar o vídeo.", e.code));
   player.on("setupError", e => showError("Erro ao iniciar o player.", e.code));
 
-  /* ── teclado ── */
   document.addEventListener("keydown", e => {
     if (e.target.tagName === "INPUT" || e.target.isContentEditable) return;
 
