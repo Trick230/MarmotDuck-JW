@@ -1,88 +1,124 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MarmotDuck Player</title>
   <link rel="icon" href="data:image/x-icon;base64,AA">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wilson959/player@master/Netflix_3.css">
   <style>
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; }
-    #player { position: absolute; width: 100% !important; height: 100% !important; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
+    #player { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
   </style>
 </head>
 <body>
 <div id="player"></div>
 <script src="https://cdn.jwplayer.com/libraries/DV3FtaT5.js"></script>
 <script>
-  const params = new URLSearchParams(window.location.search);
-  const videoSrc = params.get("src");
-  const videoSubs = params.get("subs");
-  const videoSubsLabel = params.get("subsLabel") || "Legenda";
-  const videoTitle = params.get("title") || "Título";
- 
-  if (!videoSrc) {
-    document.body.innerHTML = "<p style='color:white;text-align:center;margin-top:20px'>Nenhum vídeo fornecido</p>";
-    throw new Error("SRC não informado");
-  }
- 
-  const playerInstance = jwplayer("player").setup({
-    controls: true,
-    pip: true,
-    sharing: false,
-    hlshtml: true,
-    preload: "none",
-    displaytitle: true,
-    displaydescription: true,
-    abouttext: "",
-    aboutlink: "",
-    contextmenu: false,
-    volume: 100,
-    skin: { name: "netflix" },
-    file: decodeURIComponent(videoSrc),
-    title: decodeURIComponent(videoTitle),
-    description: "Estás a assistir",
-    tracks: videoSubs ? [{
-      file: decodeURIComponent(videoSubs),
+  (function () {
+    const params = new URLSearchParams(window.location.search);
+    const videoSrc = params.get("src");
+
+    if (!videoSrc) {
+      document.body.innerHTML = "<p style='color:#fff;text-align:center;padding:40px;font-family:sans-serif'>Nenhum vídeo fornecido.</p>";
+      return;
+    }
+
+    const decode = (val, fallback = "") => val ? decodeURIComponent(val) : fallback;
+
+    const videoSubs    = params.get("subs");
+    const videoTitle   = decode(params.get("title"), "Título");
+    const subsLabel    = decode(params.get("subsLabel"), "Legenda");
+
+    const tracks = videoSubs ? [{
+      file: decode(videoSubs),
       kind: "captions",
-      label: decodeURIComponent(videoSubsLabel),
+      label: subsLabel,
       default: false
-    }] : []
-  });
- 
-  playerInstance.on("ready", function () {
-    playerInstance.setCaptions({ mode: "hidden" });
- 
-    playerInstance.addButton("", "Download", function() {
-      const a = document.createElement("a");
-      a.href = playerInstance.getPlaylistItem().file;
-      a.download = a.href.split("/").pop();
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }, "download-video-button");
- 
-    const container = playerInstance.getContainer();
-    const btnContainer = container.querySelector(".jw-button-container");
-    const rewindDisplay = container.querySelector(".jw-display-icon-rewind");
-    const rewindBar = btnContainer.querySelector(".jw-icon-rewind");
- 
-    const fwdDisplay = rewindDisplay.cloneNode(true);
-    const fwdDisplayBtn = fwdDisplay.querySelector(".jw-icon-rewind");
-    fwdDisplayBtn.style.transform = "scaleX(-1)";
-    fwdDisplayBtn.ariaLabel = "Avançar 10s";
- 
-    container.querySelector(".jw-display-icon-next").style.display = "none";
-    rewindDisplay.parentNode.insertBefore(fwdDisplay, rewindDisplay.nextElementSibling);
- 
-    const fwdBar = rewindBar.cloneNode(true);
-    fwdBar.style.transform = "scaleX(-1)";
-    fwdBar.ariaLabel = "Avançar 10s";
-    rewindBar.parentNode.insertBefore(fwdBar, rewindBar.nextElementSibling);
- 
-    [fwdDisplayBtn, fwdBar].forEach(btn => {
-      btn.onclick = () => playerInstance.seek(playerInstance.getPosition() + 10);
+    }] : [];
+
+    const player = jwplayer("player").setup({
+      file: decode(videoSrc),
+      title: videoTitle,
+      description: "Estás a assistir",
+      tracks,
+      controls: true,
+      pip: true,
+      sharing: false,
+      hlshtml: true,
+      preload: "none",
+      displaytitle: true,
+      displaydescription: true,
+      abouttext: "",
+      aboutlink: "",
+      contextmenu: false,
+      volume: 100,
+      skin: { name: "netflix" },
+      // Melhora performance em HLS
+      hlsconfig: {
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        startLevel: -1 // auto qualidade
+      }
     });
-  });
+
+    player.on("ready", function () {
+      player.setCaptions({ mode: "hidden" });
+
+      // Botão download
+      player.addButton("", "Download", function () {
+        const url = player.getPlaylistItem().file;
+        const a = Object.assign(document.createElement("a"), {
+          href: url,
+          download: url.split("/").pop()
+        });
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }, "download-video-button");
+
+      // Botão avançar 10s
+      const container  = player.getContainer();
+      const btnBar     = container.querySelector(".jw-button-container");
+      const rwDisplay  = container.querySelector(".jw-display-icon-rewind");
+      const rwBar      = btnBar.querySelector(".jw-icon-rewind");
+
+      // Esconde botão next do display central
+      const nextDisplay = container.querySelector(".jw-display-icon-next");
+      if (nextDisplay) nextDisplay.style.display = "none";
+
+      // Cria botão forward para display central e barra
+      [[rwDisplay, ".jw-icon-rewind", true], [rwBar, null, false]].forEach(([ref, selector, isDisplay]) => {
+        if (!ref) return;
+        const clone = ref.cloneNode(true);
+        const btn   = isDisplay ? clone.querySelector(selector) : clone;
+        btn.style.transform = "scaleX(-1)";
+        btn.ariaLabel = "Avançar 10s";
+        btn.onclick = () => player.seek(player.getPosition() + 10);
+        ref.parentNode.insertBefore(clone, ref.nextElementSibling);
+      });
+    });
+
+    // Atalhos de teclado
+    document.addEventListener("keydown", function (e) {
+      if (e.target.tagName === "INPUT") return;
+      switch (e.key) {
+        case "ArrowRight": player.seek(player.getPosition() + 10); break;
+        case "ArrowLeft":  player.seek(player.getPosition() - 10); break;
+        case "ArrowUp":    player.setVolume(Math.min(player.getVolume() + 10, 100)); break;
+        case "ArrowDown":  player.setVolume(Math.max(player.getVolume() - 10, 0)); break;
+        case " ":
+        case "k":
+          e.preventDefault();
+          player.getState() === "playing" ? player.pause() : player.play();
+          break;
+        case "m": player.setMute(!player.getMute()); break;
+        case "f": player.setFullscreen(!player.getFullscreen()); break;
+      }
+    });
+
+  })();
 </script>
 </body>
 </html>
