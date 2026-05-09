@@ -10,6 +10,7 @@
     *, *::before, *::after { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; overflow: hidden; }
     #player { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
+    #player video { pointer-events: none; }
     #player iframe { pointer-events: none; }
     #error { display: none; position: absolute; inset: 0; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #fff; font: 16px/1.5 sans-serif; text-align: center; padding: 24px; }
     #error.show { display: flex; }
@@ -55,21 +56,23 @@
 
   /* ── setup ── */
   const player = jwplayer("player").setup({
-    file        : decode(src),
+    file           : decode(src),
     title,
-    tracks      : subs ? [{ file: decode(subs), kind: "captions", label: subsLabel, default: false }] : [],
-    controls    : true,
-    pip         : true,
-    sharing     : false,
-    hlshtml     : true,
-    preload     : "none",
-    displaytitle: true,
-    abouttext   : "",
-    aboutlink   : "",
-    contextmenu : false,
-    volume      : 100,
-    skin        : { name: "netflix" },
-    hlsconfig   : { maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 }
+    description    : "Estás a assistir",
+    tracks         : subs ? [{ file: decode(subs), kind: "captions", label: subsLabel, default: false }] : [],
+    controls       : true,
+    pip            : true,
+    sharing        : false,
+    hlshtml        : true,
+    preload        : "none",
+    displaytitle   : true,
+    displaydescription: true,
+    abouttext      : "",
+    aboutlink      : "",
+    contextmenu    : false,
+    volume         : 100,
+    skin           : { name: "netflix" },
+    hlsconfig      : { maxBufferLength: 30, maxMaxBufferLength: 60, startLevel: -1 }
   });
 
   /* ── ready ── */
