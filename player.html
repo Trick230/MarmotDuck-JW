@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>MarmotDuck Player</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wilson959/player@master/Netflix_3.css">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="player.css">
   <style>
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; }
     #player { position: absolute; width: 100% !important; height: 100% !important; }
@@ -18,12 +19,12 @@
   const videoSubs = params.get("subs");
   const videoSubsLabel = params.get("subsLabel") || "Legenda";
   const videoTitle = params.get("title") || "Título";
-
+ 
   if (!videoSrc) {
     document.body.innerHTML = "<p style='color:white;text-align:center;margin-top:20px'>Nenhum vídeo fornecido</p>";
     throw new Error("SRC não informado");
   }
-
+ 
   const playerInstance = jwplayer("player").setup({
     controls: true,
     pip: true,
@@ -46,10 +47,10 @@
       default: false
     }] : []
   });
-
+ 
   playerInstance.on("ready", function () {
     playerInstance.setCaptions({ mode: "hidden" });
-
+ 
     playerInstance.addButton("", "Download", function() {
       const a = document.createElement("a");
       a.href = playerInstance.getPlaylistItem().file;
@@ -58,24 +59,25 @@
       a.click();
       document.body.removeChild(a);
     }, "download-video-button");
-
+ 
     const container = playerInstance.getContainer();
     const btnContainer = container.querySelector(".jw-button-container");
     const rewindDisplay = container.querySelector(".jw-display-icon-rewind");
     const rewindBar = btnContainer.querySelector(".jw-icon-rewind");
-
+ 
     const fwdDisplay = rewindDisplay.cloneNode(true);
     const fwdDisplayBtn = fwdDisplay.querySelector(".jw-icon-rewind");
     fwdDisplayBtn.style.transform = "scaleX(-1)";
     fwdDisplayBtn.ariaLabel = "Avançar 10s";
+ 
     container.querySelector(".jw-display-icon-next").style.display = "none";
     rewindDisplay.parentNode.insertBefore(fwdDisplay, rewindDisplay.nextElementSibling);
-
+ 
     const fwdBar = rewindBar.cloneNode(true);
     fwdBar.style.transform = "scaleX(-1)";
     fwdBar.ariaLabel = "Avançar 10s";
     rewindBar.parentNode.insertBefore(fwdBar, rewindBar.nextElementSibling);
-
+ 
     [fwdDisplayBtn, fwdBar].forEach(btn => {
       btn.onclick = () => playerInstance.seek(playerInstance.getPosition() + 10);
     });
